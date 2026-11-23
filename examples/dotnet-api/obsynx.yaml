@@ -1,0 +1,33 @@
+service:
+  name: dotnet-api
+  runtime: dotnet
+
+instrumentation:
+  automatic: true
+
+  methods:
+    - class: PaymentService
+      method: ProcessPayment
+      tracing: true
+      metrics:
+        - name: payments.processed.total
+          type: counter
+          value_from: "1"
+          attributes_from:
+            payment_status: "return.Status"
+          description: "Total de pagamentos por status retornado"
+        - name: payments.amount.total
+          type: counter
+          unit: BRL
+          value_from: "arg.amount"
+          attributes_from:
+            payment_status: "return.Status"
+          description: "Soma do valor financeiro de entrada (arg.amount) filtrado pelo status de saida (return.Status)"
+        - name: payments.processing.duration
+          type: histogram
+          unit: ms
+          value_from: "duration_ms"
+          description: "Duracao de execucao de PaymentService.ProcessPayment"
+        - name: payments.in_flight
+          type: updowncounter
+          description: "Pagamentos em execucao simultanea"

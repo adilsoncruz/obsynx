@@ -1,0 +1,25 @@
+adapter:
+  id: opentelemetry-nodejs
+  runtime: nodejs
+  strategy: runtime-preload
+  version: "0.54.0"
+
+  capabilities:
+    automatic_http: true
+    automatic_database: true
+    automatic_messaging: true
+    custom_method_tracing: conditional
+    custom_method_arguments: restricted
+    custom_return_values: restricted
+    metrics: true
+    traces: true
+    logs: conditional
+
+  requirements:
+    - compatible_nodejs_18_plus
+    - node_options_require_preload
+    - application_restart
+
+  constraints:
+    - "Requires NODE_OPTIONS='--require @opentelemetry/auto-instrumentations-node/register'"
+    - "Custom method tracing requires SDK wrapper or custom ESM/CJS loader hook"

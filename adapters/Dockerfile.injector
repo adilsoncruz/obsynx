@@ -1,0 +1,61 @@
+# OBSynx Zero-Code Agent Injector (Lean Multi-Stage Init Container)
+
+# 1. JVM Builder
+FROM eclipse-temurin:21-jdk-alpine AS jvm-builder
+WORKDIR /build
+RUN apk add --no-cache curl && \
+    curl -fsSL -o byte-buddy.jar https://repo1.maven.org/maven2/net/bytebuddy/byte-buddy/1.15.10/byte-buddy-1.15.10.jar
+COPY jvm/ObsynxJvmAgent.java /build/ObsynxJvmAgent.java
+RUN mkdir -p /build/classes && \
+    javac -cp byte-buddy.jar -d /build/classes /build/ObsynxJvmAgent.java && \
+    cd /build/classes && \
+    jar xf /build/byte-buddy.jar net && \
+    printf "Manifest-Version: 1.0\nPremain-Class: com.obsynx.agent.ObsynxJvmAgent\nCan-Redefine-Classes: true\nCan-Retransform-Classes: true\n" > /build/MANIFEST.MF && \
+    jar cfm /build/obsynx-jvm-agent.jar /build/MANIFEST.MF com net
+
+# 2. Node.js Builder
+FROM node:20-alpine AS nodejs-builder
+WORKDIR /bundle/nodejs
+RUN npm install \
+      @opentelemetry/api@1.9.0 \
+      @opentelemetry/auto-instrumentations-node@0.52.0
+
+# 3. Python Builder
+FROM python:3.12-alpine AS python-builder
+WORKDIR /bundle/python
+RUN pip install --no-cache-dir --target /bundle/python \
+      setuptools==75.3.0 \
+      pyyaml==6.0.2 \
+      opentelemetry-distro==0.48b0 \
+      opentelemetry-exporter-otlp==1.27.0 \
+      opentelemetry-instrumentation-flask==0.48b0 && \
+    PYTHONPATH=/bundle/python /bundle/python/bin/opentelemetry-bootstrap -a install || true
+
+# 4. Final Lean Init Container (Base: 5MB Alpine)
+FROM alpine:3.20
+
+RUN mkdir -p /agents-bundle/jvm /agents-bundle/nodejs /agents-bundle/python /agents-bundle/ebpf /agents-bundle/dotnet
+
+# JVM Agent bundle
+RUN apk add --no-cache curl && \
+    curl -fsSL -o /agents-bundle/jvm/opentelemetry-javaagent.jar \
+      https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v2.10.0/opentelemetry-javaagent.jar && \
+    apk del curl
+COPY --from=jvm-builder /build/obsynx-jvm-agent.jar /agents-bundle/jvm/obsynx-jvm-agent.jar
+
+# Node.js bundle
+COPY --from=nodejs-builder /bundle/nodejs /agents-bundle/nodejs
+COPY nodejs/obsynx-hook.js /agents-bundle/nodejs/obsynx-hook.js
+
+# Python bundle
+COPY --from=python-builder /bundle/python /agents-bundle/python
+COPY python/sitecustomize.py /agents-bundle/python/sitecustomize.py
+
+# Go bundle
+COPY ebpf/go-observer.py /agents-bundle/ebpf/go-observer.py
+
+# .NET capability metadata & mock profiler hook
+COPY dotnet/capabilities.yaml /agents-bundle/dotnet/capabilities.yaml
+
+# Multi-Runtime Auto-Detection & Granular Injection
+CMD ["sh", "-c", "if [ -n \"$OBSYNX_RUNTIME\" ] && [ -d \"/agents-bundle/$OBSYNX_RUNTIME\" ]; then mkdir -p /obsynx-agents/$OBSYNX_RUNTIME && cp -rf /agents-bundle/$OBSYNX_RUNTIME/* /obsynx-agents/$OBSYNX_RUNTIME/ && echo \"Injected $OBSYNX_RUNTIME agents into /obsynx-agents/$OBSYNX_RUNTIME\"; elif [ -d \"/app\" ]; then if ls /app/*.jar 1>/dev/null 2>&1 || [ -f \"/app/pom.xml\" ] || [ -f \"/app/build.gradle\" ] || [ -f \"/app/build.gradle.kts\" ]; then mkdir -p /obsynx-agents/jvm && cp -rf /agents-bundle/jvm/* /obsynx-agents/jvm/ && echo 'Auto-detected JVM runtime: injected JVM agents'; elif [ -f \"/app/package.json\" ]; then mkdir -p /obsynx-agents/nodejs && cp -rf /agents-bundle/nodejs/* /obsynx-agents/nodejs/ && echo 'Auto-detected Node.js runtime: injected Node.js agents'; elif [ -f \"/app/requirements.txt\" ] || ls /app/*.py 1>/dev/null 2>&1; then mkdir -p /obsynx-agents/python && cp -rf /agents-bundle/python/* /obsynx-agents/python/ && echo 'Auto-detected Python runtime: injected Python agents'; elif ls /app/*.dll 1>/dev/null 2>&1 || ls /app/*.csproj 1>/dev/null 2>&1; then mkdir -p /obsynx-agents/dotnet && cp -rf /agents-bundle/dotnet/* /obsynx-agents/dotnet/ && echo 'Auto-detected .NET runtime: injected .NET agents'; elif [ -f \"/app/go.mod\" ]; then mkdir -p /obsynx-agents/ebpf && cp -rf /agents-bundle/ebpf/* /obsynx-agents/ebpf/ && echo 'Auto-detected Go runtime: injected Go observer'; else cp -rf /agents-bundle/* /obsynx-agents/ && echo 'OBSynx all agents injected into /obsynx-agents'; fi; else cp -rf /agents-bundle/* /obsynx-agents/ && echo 'OBSynx all agents injected into /obsynx-agents'; fi"]

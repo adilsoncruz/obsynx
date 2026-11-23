@@ -1,0 +1,25 @@
+adapter:
+  id: opentelemetry-python
+  runtime: python
+  strategy: runtime-preload
+  version: "0.48b0"
+
+  capabilities:
+    automatic_http: true
+    automatic_database: true
+    automatic_messaging: true
+    custom_method_tracing: conditional
+    custom_method_arguments: restricted
+    custom_return_values: restricted
+    metrics: true
+    traces: true
+    logs: conditional
+
+  requirements:
+    - compatible_python_3_8_plus
+    - opentelemetry_instrument_wrapper_or_sitecustomize
+    - application_restart
+
+  constraints:
+    - "Uses monkey-patching via opentelemetry-instrument orPYTHONPATH sitecustomize"
+    - "C-extension modules cannot be monkey-patched without native hooks or eBPF"

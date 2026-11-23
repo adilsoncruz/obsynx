@@ -1,0 +1,26 @@
+adapter:
+  id: obi-ebpf
+  runtime: any-linux-elf
+  strategy: ebpf
+  version: "1.9.4"
+
+  capabilities:
+    automatic_http: true
+    automatic_database: conditional
+    automatic_messaging: conditional
+    custom_method_tracing: false
+    custom_method_arguments: false
+    custom_return_values: false
+    metrics: true
+    traces: true
+    logs: false
+
+  requirements:
+    - linux_kernel_5_8_plus_with_btf
+    - cap_bpf_or_privileged_container
+    - shared_pid_namespace
+
+  constraints:
+    - "Observes supported network/HTTP/gRPC/SQL protocols at kernel/uprobe boundary"
+    - "Does not automatically understand internal business domain functions (e.g., calculateCustomerRisk)"
+    - "Go binaries must retain symbol tables (cannot be stripped with -ldflags='-s -w' for uprobes)"

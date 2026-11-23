@@ -1,0 +1,33 @@
+adapter:
+  id: opentelemetry-dotnet
+  runtime: dotnet
+  strategy: runtime-preload
+  version: "1.8.0"
+
+  capabilities:
+    automatic_http: true
+    automatic_database: true
+    automatic_messaging: true
+    custom_method_tracing: true
+    custom_method_arguments: restricted
+    custom_return_values: restricted
+    metrics: true
+    traces: true
+    logs: true
+
+  requirements:
+    - compatible_dotnet_6_plus
+    - coreclr_profiler_env_vars
+    - application_restart
+
+  env_vars:
+    CORECLR_ENABLE_PROFILING: "1"
+    CORECLR_PROFILER: "{918728DD-259F-4A63-ADAC-BB42230AE3B2}"
+    CORECLR_PROFILER_PATH: "/obsynx-agents/dotnet/linux-x64/OpenTelemetry.AutoInstrumentation.Native.so"
+    DOTNET_STARTUP_HOOKS: "/obsynx-agents/dotnet/net/OpenTelemetry.AutoInstrumentation.StartupHook.dll"
+    DOTNET_ADDITIONAL_DEPS: "/obsynx-agents/dotnet/AdditionalDeps"
+    DOTNET_SHARED_STORE: "/obsynx-agents/dotnet/store"
+
+  constraints:
+    - "Attaches via CoreCLR Profiler API without recompilation or SDK dependency"
+    - "Requires OpenTelemetry.AutoInstrumentation native bundle matching host architecture"

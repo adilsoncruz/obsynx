@@ -1,0 +1,44 @@
+service:
+  name: go-api
+  runtime: go
+
+instrumentation:
+  automatic: true
+
+  methods:
+    - method: processPayment
+      tracing: true
+      metrics:
+        - name: payments.processed.total
+          type: counter
+          value_from: "1"
+          attributes_from:
+            payment_status: "return.status"
+          description: "Total de pagamentos por status retornado"
+        - name: payments.amount.total
+          type: counter
+          unit: BRL
+          value_from: "arg.amount"
+          attributes_from:
+            payment_status: "return.status"
+          description: "Soma do valor financeiro de entrada (arg.amount) filtrado pelo status de saida (return.status)"
+        - name: payments.processing.duration
+          type: histogram
+          unit: ms
+          value_from: "duration_ms"
+          description: "Duracao de execucao da funcao processPayment"
+        - name: payments.in_flight
+          type: updowncounter
+          description: "Pagamentos em execucao simultanea"
+
+    - method: calculateCustomerRisk
+      tracing: true
+      metrics:
+        - name: customer.risk.calculations.total
+          type: counter
+          value_from: "1"
+          description: "Total de avaliacoes de risco executadas"
+        - name: customer.risk.last_score
+          type: gauge
+          value_from: "return"
+          description: "Ultimo score de risco retornado (return) pela funcao calculateCustomerRisk"

@@ -1,0 +1,26 @@
+adapter:
+  id: opentelemetry-java
+  runtime: jvm
+  strategy: java-agent
+  version: "2.10.0"
+
+  capabilities:
+    automatic_http: true
+    automatic_database: true
+    automatic_messaging: true
+    custom_method_tracing: conditional
+    custom_method_arguments: restricted
+    custom_return_values: restricted
+    metrics: true
+    traces: true
+    logs: conditional
+
+  requirements:
+    - compatible_jvm_8_plus
+    - application_restart_or_dynamic_attach
+    - env_java_tool_options
+
+  constraints:
+    - "Only supported libraries and framework versions are automatically instrumented"
+    - "Custom method tracing works via OTEL_INSTRUMENTATION_METHODS_INCLUDE (class[method1,method2]) without capturing arguments by default"
+    - "Capturing method arguments/returns requires custom ByteBuddy extension and explicit privacy policy"
