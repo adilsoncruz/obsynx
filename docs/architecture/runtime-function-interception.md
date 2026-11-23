@@ -424,7 +424,7 @@ In both strategies, **source code in the Git repository remains 100% clean and f
 
 ## 11. Repository Technical References
 
-- [Main OBSynx Architecture Plan](obsynx-architecture-and-roadmap-v0.2.md)
+- [Main OBSynx Architecture Plan](obsynx-architecture-and-roadmap.md)
 - [Capability & Version Matrix](../capabilities/capability-matrix-v0.1.md)
 - [JVM Byte Buddy Agent Source](../../adapters/jvm/ObsynxJvmAgent.java)
 - [Node.js V8 Hook Source](../../adapters/nodejs/obsynx-hook.js)
