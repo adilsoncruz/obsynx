@@ -300,7 +300,9 @@ Contribuições são muito bem-vindas! Consulte os guias da comunidade antes de 
 
 ---
 
-## Licença
+## Licença & Autoria
 
-Distribuído sob a licença **Apache 2.0**. Consulte o arquivo [LICENSE](LICENSE) para obter os termos e condições na íntegra.
+Distribuído sob a licença **Apache 2.0**. Consulte o arquivo [LICENSE](LICENSE) e o arquivo [NOTICE](NOTICE) para termos e condições de atribuição.
+
+Copyright (c) 2026 **Adilson Cruz** (<https://github.com/adilsoncruz>). Todos os direitos reservados.
 
