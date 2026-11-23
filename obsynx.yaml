@@ -1,0 +1,25 @@
+version: "0.2"
+collector:
+    otlp_endpoint: http://otel-collector:4317
+    protocol: grpc
+policies:
+    sampling:
+        strategy: parent-based
+        ratio: 0.1
+    attributes:
+        allow:
+            - service.name
+            - http.request.method
+            - http.response.status_code
+            - payment_status
+        deny:
+            - enduser.id
+            - user.email
+            - authorization
+    limits:
+        max_attributes_per_span: 32
+        max_events_per_span: 64
+    collection:
+        exclude_paths:
+            - /health
+            - /ready

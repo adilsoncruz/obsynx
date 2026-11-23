@@ -1,0 +1,22 @@
+# Binaries
+bin/
+/obsynx
+*.exe
+*.out
+
+# Build & Gradle
+.gradle/
+build/
+target/
+
+# IDE & OS
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Local Lab Data & OBSynx State
+deploy/lab/data/
+.obsynx/
+deploy/lab/docker-compose.obsynx.override.yml
+deploy/collector/otel-collector.obsynx.yaml
