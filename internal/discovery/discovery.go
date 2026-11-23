@@ -228,7 +228,8 @@ func inspectSourceDir(name, dir string) (DiscoveredService, bool) {
 		}
 		if strings.Contains(strings.ToLower(string(data)), "flask") {
 			svc.Framework = "flask"
-		} else if strings.Contains(strings.ToLower(string(data)), "fastapi") {
+		}
+		if strings.Contains(strings.ToLower(string(data)), "fastapi") {
 			svc.Framework = "fastapi"
 		}
 		return svc, true
@@ -323,9 +324,9 @@ func enrichWithLiveRuntime(inv *Inventory) {
 		}
 		if matchProcessName(svc.Name, runningProcs) {
 			svc.Evidence["host_process"] = "running"
-		} else {
-			svc.Evidence["container_state"] = "not-running (manifest-discovered)"
+			continue
 		}
+		svc.Evidence["container_state"] = "not-running (manifest-discovered)"
 	}
 }
 

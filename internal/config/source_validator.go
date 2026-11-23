@@ -219,9 +219,9 @@ func toSnakeCase(s string) string {
 				out = append(out, '_')
 			}
 			out = append(out, r+('a'-'A'))
-		} else {
-			out = append(out, r)
+			continue
 		}
+		out = append(out, r)
 	}
 	return string(out)
 }
@@ -467,7 +467,8 @@ func indexPythonFile(path string, idx *SourceIndex) {
 			cls := moduleName
 			if len(indent) > 0 && currentClass != "" {
 				cls = currentClass
-			} else {
+			}
+			if len(indent) == 0 {
 				currentClass = ""
 			}
 			var params []string

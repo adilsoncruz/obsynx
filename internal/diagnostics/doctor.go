@@ -39,19 +39,19 @@ func RunDoctor(rootDir, configPath string, reg *capabilities.Registry) ([]CheckR
 	var results []CheckResult
 
 	// 1. OS & eBPF host capability check
+	osCheck := CheckResult{
+		Name:    "host_os_ebpf",
+		Status:  "WARN",
+		Details: fmt.Sprintf("Host OS is %s/%s; OBI/eBPF requires a Linux container/VM kernel (Docker Desktop / OrbStack / Colima).", runtime.GOOS, runtime.GOARCH),
+	}
 	if runtime.GOOS == "linux" {
-		results = append(results, CheckResult{
+		osCheck = CheckResult{
 			Name:    "host_os_ebpf",
 			Status:  "PASS",
 			Details: "Running natively on Linux kernel; eBPF/OBI supported with CAP_BPF.",
-		})
-	} else {
-		results = append(results, CheckResult{
-			Name:    "host_os_ebpf",
-			Status:  "WARN",
-			Details: fmt.Sprintf("Host OS is %s/%s; OBI/eBPF requires a Linux container/VM kernel (Docker Desktop / OrbStack / Colima).", runtime.GOOS, runtime.GOARCH),
-		})
+		}
 	}
+	results = append(results, osCheck)
 
 	// 2. Capability Registry check
 	adaptersList := reg.List()
@@ -63,59 +63,58 @@ func RunDoctor(rootDir, configPath string, reg *capabilities.Registry) ([]CheckR
 
 	// 3. OpenTelemetry Collector config check
 	collectorCfgPath := filepath.Join(rootDir, "deploy", "collector", "otel-collector-config.yaml")
+	collectorCheck := CheckResult{
+		Name:    "collector_pipeline_config",
+		Status:  "WARN",
+		Details: "Local Collector configuration not found under deploy/collector/otel-collector-config.yaml.",
+	}
 	if _, err := os.Stat(collectorCfgPath); err == nil {
-		results = append(results, CheckResult{
+		collectorCheck = CheckResult{
 			Name:    "collector_pipeline_config",
 			Status:  "PASS",
 			Details: fmt.Sprintf("Collector config found at %s.", collectorCfgPath),
-		})
-	} else {
-		results = append(results, CheckResult{
-			Name:    "collector_pipeline_config",
-			Status:  "WARN",
-			Details: "Local Collector configuration not found under deploy/collector/otel-collector-config.yaml.",
-		})
+		}
 	}
+	results = append(results, collectorCheck)
 
 	// 4. OBSynx configuration file check
+	configCheck := CheckResult{
+		Name:    "obsynx_config",
+		Status:  "WARN",
+		Details: fmt.Sprintf("Configuration %s not found (run 'obsynx init' to create it).", configPath),
+	}
 	if _, err := os.Stat(configPath); err == nil {
-		if _, loadErr := config.Load(configPath); loadErr == nil {
-			results = append(results, CheckResult{
-				Name:    "obsynx_config",
-				Status:  "PASS",
-				Details: fmt.Sprintf("Configuration %s is valid.", configPath),
-			})
-		} else {
-			results = append(results, CheckResult{
+		configCheck = CheckResult{
+			Name:    "obsynx_config",
+			Status:  "PASS",
+			Details: fmt.Sprintf("Configuration %s is valid.", configPath),
+		}
+		if _, loadErr := config.Load(configPath); loadErr != nil {
+			configCheck = CheckResult{
 				Name:    "obsynx_config",
 				Status:  "FAIL",
 				Details: fmt.Sprintf("Configuration %s is invalid: %v", configPath, loadErr),
-			})
+			}
 		}
-	} else {
-		results = append(results, CheckResult{
-			Name:    "obsynx_config",
-			Status:  "WARN",
-			Details: fmt.Sprintf("Configuration %s not found (run 'obsynx init' to create it).", configPath),
-		})
 	}
+	results = append(results, configCheck)
 
 	// 5. Managed artifacts integrity & drift check (Phase 6)
 	if state, err := lifecycle.LoadState(rootDir); err == nil && state.Status == "applied" {
 		drifts := lifecycle.VerifyIntegrity(rootDir, state)
-		if len(drifts) == 0 {
-			results = append(results, CheckResult{
-				Name:    "managed_state_integrity",
-				Status:  "PASS",
-				Details: fmt.Sprintf("All %d managed artifact(s) match SHA-256 checksums.", len(state.GeneratedFiles)),
-			})
-		} else {
-			results = append(results, CheckResult{
+		integrityCheck := CheckResult{
+			Name:    "managed_state_integrity",
+			Status:  "PASS",
+			Details: fmt.Sprintf("All %d managed artifact(s) match SHA-256 checksums.", len(state.GeneratedFiles)),
+		}
+		if len(drifts) > 0 {
+			integrityCheck = CheckResult{
 				Name:    "managed_state_integrity",
 				Status:  "WARN",
 				Details: fmt.Sprintf("Configuration drift detected: %s", strings.Join(drifts, "; ")),
-			})
+			}
 		}
+		results = append(results, integrityCheck)
 	}
 
 	metrics := SelfMetrics{
