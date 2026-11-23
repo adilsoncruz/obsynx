@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    name: Test & Coverage Gate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+          cache: true
+
+      - name: Go Vet
+        run: go vet ./...
+
+      - name: Run Tests with Coverage
+        run: |
+          go test -v -coverprofile=coverage.out ./...
+          COVERAGE=$(go tool cover -func=coverage.out | grep total: | awk '{print substr($3, 1, length($3)-1)}')
+          echo "Total statement coverage: ${COVERAGE}%"
+          # Enforce >= 95.0% coverage threshold
+          awk -v cov="$COVERAGE" 'BEGIN {
+            if (cov < 95.0) {
+              print "ERROR: Coverage " cov "% is below required threshold 95.0%"
+              exit 1
+            }
+            print "SUCCESS: Coverage threshold passed (" cov "% >= 95.0%)"
+          }'
+
+      - name: Build CLI Binary
+        run: go build -o bin/obsynx ./cmd/obsynx
