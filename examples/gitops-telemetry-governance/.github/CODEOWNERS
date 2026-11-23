@@ -1,0 +1,7 @@
+# Telemetry Governance CODEOWNERS
+# Global platform rules require review from Platform & Observability teams
+/global/                        @org/platform-observability @org/sre-core
+
+# Service-specific telemetry rules require approval from service squads
+/services/payment-service/      @org/squad-payments @org/platform-observability
+/services/order-service-serverless/ @org/squad-orders @org/platform-observability

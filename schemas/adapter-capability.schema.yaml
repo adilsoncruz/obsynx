@@ -1,0 +1,74 @@
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: "OBSynx Adapter Capability Contract"
+description: "Contract declared by each OBSynx instrumentation adapter (Section 6)."
+type: object
+required:
+  - adapter
+properties:
+  adapter:
+    type: object
+    required:
+      - id
+      - runtime
+      - strategy
+      - capabilities
+      - requirements
+      - constraints
+    properties:
+      id:
+        type: string
+        description: "Unique identifier of the adapter (e.g., opentelemetry-java, obi-ebpf)."
+      runtime:
+        type: string
+        enum: [jvm, go, nodejs, python, dotnet, any-linux-elf]
+      strategy:
+        type: string
+        enum: [java-agent, ebpf, runtime-preload, build-time, sdk]
+      capabilities:
+        type: object
+        required:
+          - automatic_http
+          - automatic_database
+          - automatic_messaging
+          - custom_method_tracing
+          - custom_method_arguments
+          - custom_return_values
+          - metrics
+          - traces
+          - logs
+        properties:
+          automatic_http:
+            type: [boolean, string]
+            enum: [true, false, "conditional", "restricted"]
+          automatic_database:
+            type: [boolean, string]
+            enum: [true, false, "conditional", "restricted"]
+          automatic_messaging:
+            type: [boolean, string]
+            enum: [true, false, "conditional", "restricted"]
+          custom_method_tracing:
+            type: [boolean, string]
+            enum: [true, false, "conditional", "restricted"]
+          custom_method_arguments:
+            type: [boolean, string]
+            enum: [true, false, "conditional", "restricted"]
+          custom_return_values:
+            type: [boolean, string]
+            enum: [true, false, "conditional", "restricted"]
+          metrics:
+            type: [boolean, string]
+            enum: [true, false, "conditional", "restricted"]
+          traces:
+            type: [boolean, string]
+            enum: [true, false, "conditional", "restricted"]
+          logs:
+            type: [boolean, string]
+            enum: [true, false, "conditional", "restricted"]
+      requirements:
+        type: array
+        items:
+          type: string
+      constraints:
+        type: array
+        items:
+          type: string

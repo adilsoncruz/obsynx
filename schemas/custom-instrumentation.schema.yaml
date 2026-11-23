@@ -1,0 +1,36 @@
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: "OBSynx Custom Instrumentation Rules Contract"
+description: "Declarative schema for business method tracing, derived metrics, and security guardrails (Section 9)."
+type: object
+required:
+  - method
+properties:
+  class:
+    type: string
+    description: "Fully-qualified class or package name (required for JVM bytecode instrumentation)."
+  method:
+    type: string
+    description: "Target method or function name."
+  tracing:
+    type: boolean
+    default: true
+  metrics:
+    type: array
+    description: "OpenTelemetry business metrics derived from spans via Collector spanmetrics connector."
+    items:
+      type: string
+      enum: ["counter", "histogram"]
+  capture_arguments:
+    type: boolean
+    default: false
+    description: "Blocked by default unless allowed_attributes is explicitly provided and passes PII validation."
+  capture_return:
+    type: boolean
+    default: false
+    description: "Blocked by default unless allowed_attributes is explicitly provided and passes PII validation."
+  allowed_attributes:
+    type: array
+    description: "Explicit allowlist of safe business attributes when argument/return capture is enabled (max 5 to prevent high cardinality)."
+    maxItems: 5
+    items:
+      type: string

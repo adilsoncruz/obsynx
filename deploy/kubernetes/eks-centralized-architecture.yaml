@@ -1,0 +1,238 @@
+# ==============================================================================
+# OBSYNX ZERO-CODE OBSERVABILITY - COMPLETE EKS & SERVERLESS STACK
+# Architecture: Centralized OpenTelemetry Collector + Zero-Code Injection
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# 1. NAMESPACE DE OBSERVABILIDADE
+# ------------------------------------------------------------------------------
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: observability
+  labels:
+    name: observability
+
+---
+# ------------------------------------------------------------------------------
+# 2. CONFIGMAP DO COLETOR CENTRAL (Cluster Shared)
+# ------------------------------------------------------------------------------
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: otel-collector-config
+  namespace: observability
+data:
+  otel-collector-config.yaml: |
+    receivers:
+      otlp:
+        protocols:
+          grpc:
+            endpoint: 0.0.0.0:4317
+          http:
+            endpoint: 0.0.0.0:4318
+
+    processors:
+      batch:
+        send_batch_size: 1024
+        timeout: 1s
+      memory_limiter:
+        check_interval: 1s
+        limit_percentage: 75
+        spike_limit_percentage: 20
+
+    exporters:
+      prometheus:
+        endpoint: 0.0.0.0:8889
+        namespace: "obsynx"
+      otlp/tempo:
+        endpoint: tempo.observability.svc.cluster.local:4317
+        tls:
+          insecure: true
+      logging:
+        verbosity: normal
+
+    service:
+      pipelines:
+        metrics:
+          receivers: [otlp]
+          processors: [memory_limiter, batch]
+          exporters: [prometheus, logging]
+        traces:
+          receivers: [otlp]
+          processors: [memory_limiter, batch]
+          exporters: [otlp/tempo, logging]
+
+---
+# ------------------------------------------------------------------------------
+# 3. 1x CENTRAL OPENTELEMETRY COLLECTOR (Deployment / Service)
+# ------------------------------------------------------------------------------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: otel-collector
+  namespace: observability
+  labels:
+    app.kubernetes.io/name: otel-collector
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: otel-collector
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: otel-collector
+    spec:
+      containers:
+        - name: otel-collector
+          image: otel/opentelemetry-collector-contrib:0.100.0
+          args: ["--config=/etc/otelcol/otel-collector-config.yaml"]
+          resources:
+            limits:
+              cpu: 500m
+              memory: 512Mi
+            requests:
+              cpu: 100m
+              memory: 128Mi
+          ports:
+            - name: otlp-grpc
+              containerPort: 4317
+            - name: otlp-http
+              containerPort: 4318
+            - name: prom-metrics
+              containerPort: 8889
+          volumeMounts:
+            - name: collector-config-vol
+              mountPath: /etc/otelcol
+      volumes:
+        - name: collector-config-vol
+          configMap:
+            name: otel-collector-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: otel-collector
+  namespace: observability
+spec:
+  selector:
+    app.kubernetes.io/name: otel-collector
+  ports:
+    - name: otlp-grpc
+      port: 4317
+      targetPort: 4317
+    - name: otlp-http
+      port: 4318
+      targetPort: 4318
+    - name: prometheus
+      port: 8889
+      targetPort: 8889
+
+---
+# ------------------------------------------------------------------------------
+# 4. APPLICATION POD 1: PAYMENTS API (JVM / Spring Boot)
+# Injeção Zero-Code: InitContainer + emptyDir + JAVA_TOOL_OPTIONS
+# ------------------------------------------------------------------------------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payments-api
+  namespace: default
+  labels:
+    app: payments-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: payments-api
+  template:
+    metadata:
+      labels:
+        app: payments-api
+    spec:
+      volumes:
+        - name: obsynx-agents
+          emptyDir: {}
+      initContainers:
+        - name: obsynx-injector
+          image: ghcr.io/obsynx/obsynx-injector:v0.1.0
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: OBSYNX_RUNTIME
+              value: "jvm"
+          volumeMounts:
+            - name: obsynx-agents
+              mountPath: /obsynx-agents
+      containers:
+        - name: app
+          image: mycompany/payments-api:v2.4.0 # Imagem 100% pura
+          ports:
+            - containerPort: 8080
+          env:
+            - name: JAVA_TOOL_OPTIONS
+              value: "-javaagent:/obsynx-agents/jvm/obsynx-jvm-agent.jar"
+            - name: OBSYNX_CONFIG_PATH
+              value: "/app/obsynx.yaml"
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: "http://otel-collector.observability.svc.cluster.local:4317"
+            - name: OTEL_SERVICE_NAME
+              value: "payments-api"
+          volumeMounts:
+            - name: obsynx-agents
+              mountPath: /obsynx-agents
+              readOnly: true
+
+---
+# ------------------------------------------------------------------------------
+# 5. APPLICATION POD 2: ORDERS API (Node.js / Express)
+# Injeção Zero-Code: InitContainer + emptyDir + NODE_OPTIONS
+# ------------------------------------------------------------------------------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: orders-api
+  namespace: default
+  labels:
+    app: orders-api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: orders-api
+  template:
+    metadata:
+      labels:
+        app: orders-api
+    spec:
+      volumes:
+        - name: obsynx-agents
+          emptyDir: {}
+      initContainers:
+        - name: obsynx-injector
+          image: ghcr.io/obsynx/obsynx-injector:v0.1.0
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: OBSYNX_RUNTIME
+              value: "nodejs"
+          volumeMounts:
+            - name: obsynx-agents
+              mountPath: /obsynx-agents
+      containers:
+        - name: app
+          image: mycompany/orders-api:v1.8.0 # Imagem 100% pura
+          ports:
+            - containerPort: 3000
+          env:
+            - name: NODE_OPTIONS
+              value: "--require /obsynx-agents/nodejs/obsynx-hook.js"
+            - name: OBSYNX_CONFIG_PATH
+              value: "/app/obsynx.yaml"
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: "http://otel-collector.observability.svc.cluster.local:4318"
+            - name: OTEL_SERVICE_NAME
+              value: "orders-api"
+          volumeMounts:
+            - name: obsynx-agents
+              mountPath: /obsynx-agents
+              readOnly: true

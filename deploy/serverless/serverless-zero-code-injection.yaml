@@ -1,0 +1,74 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  OBSYNX Serverless Zero-Code Architecture (AWS Lambda Layer + Extension)
+  Injeção 100% transparente sem alteração no código fonte da aplicação.
+
+Globals:
+  Function:
+    Timeout: 15
+    MemorySize: 512
+    Tracing: PassThrough
+
+Resources:
+  # ============================================================================
+  # 1. OBSYNX LAMBDA LAYER (Agentes + Lambda Extension)
+  # Disponibiliza binários e hooks em /opt/obsynx-agents e /opt/extensions
+  # ============================================================================
+  ObsynxTelemetryLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: obsynx-telemetry-layer
+      Description: OBSYNX Zero-Code In-Memory Interceptors and Telemetry Extension
+      ContentUri: ./layer/ # Contém /opt/obsynx-agents e /opt/extensions/obsynx-extension
+      CompatibleRuntimes:
+        - java21
+        - nodejs20.x
+        - python3.12
+      RetentionPolicy: Delete
+
+  # ============================================================================
+  # 2. SERVERLESS FUNCTION 1: PAYMENTS API (Node.js)
+  # Zero alteração de código: ativado exclusivamente por variáveis nativas
+  # ============================================================================
+  PaymentsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: obsynx-payments-serverless
+      CodeUri: ./src/payments/ # Código fonte 100% puro
+      Handler: index.handler
+      Runtime: nodejs20.x
+      Layers:
+        - !Ref ObsynxTelemetryLayer
+      Environment:
+        Variables:
+          # Injeção nativa do V8 Proxy no bootstrap do Node.js
+          NODE_OPTIONS: "--require /opt/obsynx-agents/nodejs/obsynx-hook.js"
+          OBSYNX_CONFIG_PATH: "/opt/obsynx-agents/obsynx.yaml"
+          # Destino OTLP (Collector central na VPC ou Gateway gerenciado)
+          OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector.internal:4318"
+          OTEL_SERVICE_NAME: "payments-serverless"
+          # Flag para forçar o Extension a dar Flush antes do freeze do Lambda
+          OBSYNX_FLUSH_ON_FREEZE: "true"
+
+  # ============================================================================
+  # 3. SERVERLESS FUNCTION 2: ORDERS API (Python)
+  # Zero alteração de código: ativado via sitecustomize / PYTHONPATH
+  # ============================================================================
+  OrdersFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: obsynx-orders-serverless
+      CodeUri: ./src/orders/ # Código fonte 100% puro
+      Handler: app.lambda_handler
+      Runtime: python3.12
+      Layers:
+        - !Ref ObsynxTelemetryLayer
+      Environment:
+        Variables:
+          # Injeção nativa via PYTHONPATH no bootstrap do CPython
+          PYTHONPATH: "/opt/obsynx-agents/python:/var/runtime"
+          OBSYNX_CONFIG_PATH: "/opt/obsynx-agents/obsynx.yaml"
+          OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector.internal:4318"
+          OTEL_SERVICE_NAME: "orders-serverless"
+          OBSYNX_FLUSH_ON_FREEZE: "true"

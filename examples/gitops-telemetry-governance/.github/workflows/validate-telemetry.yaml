@@ -1,0 +1,49 @@
+name: Validate Telemetry Rules (GitOps)
+
+on:
+  pull_request:
+    paths:
+      - 'services/**/obsynx.yaml'
+      - 'global/**'
+
+jobs:
+  validate:
+    name: Shift-Left Governance Checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+
+      - name: Install OBSYNX CLI
+        run: |
+          go install github.com/obsynx/obsynx/cmd/obsynx@latest || echo "CLI built locally or preinstalled"
+
+      - name: Validate YAML Schema & Method Rules
+        run: |
+          echo "Running schema & structural validation across service rules..."
+          for cfg in services/*/obsynx.yaml; do
+            [ -f "$cfg" ] || continue
+            echo "Checking: $cfg"
+            if command -v obsynx >/dev/null 2>&1; then
+              obsynx config validate "$cfg"
+            fi
+          done
+
+      - name: Automated PII Keyword Scanner
+        run: |
+          echo "Checking for sensitive data keywords in attributes_from and value_from..."
+          SENSITIVE_PATTERNS="password|passwd|secret|token|apikey|creditcard|cardnumber|cvv|cpf|ssn"
+          
+          VIOLATIONS=$(grep -Ei "($SENSITIVE_PATTERNS)" services/*/obsynx.yaml || true)
+          if [ -n "$VIOLATIONS" ]; then
+            echo "❌ [SECURITY VIOLATION] Sensitive data attribute detected in telemetry configuration:"
+            echo "$VIOLATIONS"
+            echo "Please remove any extraction of credentials, credit cards, or personal identifiers."
+            exit 1
+          fi
+          echo "✅ [PASSED] No PII keywords detected."

@@ -1,0 +1,41 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: OBSYNX Serverless GitOps Telemetry Injection Example
+
+Globals:
+  Function:
+    Timeout: 10
+    MemorySize: 512
+
+Resources:
+  # 1. OBSYNX Telemetry Layer (Contains agents, node hooks, and Lambda extension)
+  ObsynxTelemetryLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: obsynx-telemetry-layer
+      Description: OBSYNX In-Memory Hooks & Telemetry Extension
+      ContentUri: ./layer/
+      CompatibleRuntimes:
+        - nodejs20.x
+        - python3.12
+        - java21
+
+  # 2. Serverless Function configured via GitOps Environment Variables
+  OrderFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: order-service-serverless
+      CodeUri: ./src/
+      Handler: app.handler
+      Runtime: nodejs20.x
+      Layers:
+        - !Ref ObsynxTelemetryLayer
+      Environment:
+        Variables:
+          # Injects the Node hook without touching the source code:
+          NODE_OPTIONS: "--require /opt/obsynx-agents/nodejs/obsynx-hook.js"
+          # Points to the GitOps-managed configuration delivered to the Lambda filesystem:
+          OBSYNX_CONFIG_PATH: "/opt/obsynx-agents/obsynx.yaml"
+          # Ensures spans & metrics are flushed to OTLP collector prior to Lambda freeze:
+          OBSYNX_FLUSH_ON_FREEZE: "true"
+          OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector.internal:4318"

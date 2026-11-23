@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment-service
+  namespace: default
+  labels:
+    app: payment-service
+    obsynx.io/inject: "true"
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: payment-service
+  template:
+    metadata:
+      labels:
+        app: payment-service
+    spec:
+      # 1. Volume compartilhado para os agentes do OBSYNX
+      volumes:
+        - name: obsynx-agents
+          emptyDir: {}
+
+      # 2. InitContainer que copia os binários sem tocar na imagem do app
+      initContainers:
+        - name: obsynx-injector
+          image: ghcr.io/obsynx/obsynx-injector:v0.1.0
+          imagePullPolicy: IfNotPresent
+          env:
+            # Opções: jvm, nodejs, python ou deixe vazio para auto-detecção
+            - name: OBSYNX_RUNTIME
+              value: "jvm"
+          volumeMounts:
+            - name: obsynx-agents
+              mountPath: /obsynx-agents
+
+      # 3. Container da aplicação 100% inalterado (apenas env vars nativas)
+      containers:
+        - name: app
+          image: my-registry/payment-service:v1.2.0
+          ports:
+            - containerPort: 8080
+          env:
+            # Injeção nativa JVM (Zero alteração no código fonte)
+            - name: JAVA_TOOL_OPTIONS
+              value: "-javaagent:/obsynx-agents/jvm/obsynx-jvm-agent.jar"
+            # Configurações do pipeline declarativo OBSYNX
+            - name: OBSYNX_CONFIG_PATH
+              value: "/app/obsynx.yaml"
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: "http://otel-collector.observability.svc.cluster.local:4317"
+            - name: OTEL_SERVICE_NAME
+              value: "payment-service"
+          volumeMounts:
+            - name: obsynx-agents
+              mountPath: /obsynx-agents
+              readOnly: true

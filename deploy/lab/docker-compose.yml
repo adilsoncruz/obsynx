@@ -1,0 +1,113 @@
+services:
+  # =========================================================================
+  # OpenTelemetry Data Plane & OSS Backends
+  # =========================================================================
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.114.0
+    container_name: obsynx-otel-collector
+    command: ["--config=/etc/otelcol-contrib/config.yaml"]
+    volumes:
+      - ../collector/otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml:ro
+    ports:
+      - "4317:4317"   # OTLP gRPC
+      - "4318:4318"   # OTLP HTTP
+      - "8888:8888"   # Collector internal metrics
+      - "8889:8889"   # Prometheus exporter metrics
+      - "13133:13133" # Health check
+    depends_on:
+      - tempo
+
+  tempo:
+    image: grafana/tempo:2.6.1
+    container_name: obsynx-tempo
+    command: ["-config.file=/etc/tempo.yaml"]
+    volumes:
+      - ./tempo/tempo.yaml:/etc/tempo.yaml:ro
+    ports:
+      - "3200:3200" # Tempo HTTP
+
+  prometheus:
+    image: prom/prometheus:v2.55.1
+    container_name: obsynx-prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --web.enable-remote-write-receiver
+      - --enable-feature=exemplar-storage
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9090:9090"
+
+  grafana:
+    image: grafana/grafana:11.3.0
+    container_name: obsynx-grafana
+    user: "0:0"
+    entrypoint: ["/etc/grafana/branding/entrypoint-custom.sh"]
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_AUTH_DISABLE_LOGIN_FORM=true
+      - GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH=/var/lib/grafana/dashboards/obsynx-overview.json
+      - GF_USERS_DEFAULT_THEME=light
+      - GF_PANELS_DISABLE_SANITIZE_HTML=true
+    volumes:
+      - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+      - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - ./grafana/branding/obsynx-logo.svg:/etc/grafana/branding/obsynx-logo.svg:ro
+      - ./grafana/branding/obsynx-theme.css:/etc/grafana/branding/obsynx-theme.css:ro
+      - ./grafana/entrypoint-custom.sh:/etc/grafana/branding/entrypoint-custom.sh:ro
+      - ./grafana/grafana.ini:/etc/grafana/grafana.ini:ro
+    ports:
+      - "3000:3000"
+    depends_on:
+      - prometheus
+      - tempo
+
+  # =========================================================================
+  # Clean Target Applications (100% Pure App Code & Pure Dockerfiles)
+  # Zero OpenTelemetry agents/SDKs installed inside the base service definitions.
+  # Instrumentation is injected externally via `obsynx apply` override!
+  # =========================================================================
+  go-api:
+    build:
+      context: ../../examples/go-api
+    container_name: obsynx-go-api
+    environment:
+      - PORT=8080
+    ports:
+      - "8084:8080"
+
+  kotlin-spring-api:
+    build:
+      context: ../../examples/kotlin-spring-api
+    container_name: obsynx-kotlin-spring-api
+    ports:
+      - "8081:8080"
+
+  nodejs-api:
+    build:
+      context: ../../examples/nodejs-api
+    container_name: obsynx-nodejs-api
+    environment:
+      - PORT=8082
+    ports:
+      - "8082:8082"
+
+  python-api:
+    build:
+      context: ../../examples/python-api
+    container_name: obsynx-python-api
+    environment:
+      - PORT=8083
+    ports:
+      - "8083:8083"
+
+  dotnet-api:
+    build:
+      context: ../../examples/dotnet-api
+    container_name: obsynx-dotnet-api
+    environment:
+      - ASPNETCORE_URLS=http://0.0.0.0:5000
+    ports:
+      - "8085:5000"

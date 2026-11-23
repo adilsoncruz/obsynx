@@ -1,0 +1,31 @@
+service:
+  name: payment-service
+  runtime: jvm
+
+instrumentation:
+  automatic: true
+  methods:
+    - method: processPayment
+      class: com.company.payment.service.PaymentProcessor
+      tracing: true
+      metrics:
+        - name: payments.processed.total
+          type: counter
+          value_from: "1"
+          attributes_from:
+            currency: "arg.0.currency"
+            status: "return.status"
+          description: "Count of processed payments grouped by currency and final status"
+        - name: payments.amount.total
+          type: counter
+          unit: USD
+          value_from: "arg.0.amount"
+          attributes_from:
+            currency: "arg.0.currency"
+            status: "return.status"
+          description: "Aggregate transaction value extracted from arguments"
+        - name: payments.processing.duration
+          type: histogram
+          unit: ms
+          value_from: "duration_ms"
+          description: "Execution latency of the payment processor"

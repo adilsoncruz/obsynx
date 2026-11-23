@@ -1,0 +1,185 @@
+/* ==========================================================================
+   OBSYNX Design System — Light Theme (Official Guideline)
+   Cores Primárias:
+     #FFFFFF — Background (Fundo principal)
+     #0056D6 — Primary Blue (Icon core, primary buttons, accents)
+     #00BFFF — Electric Highlight (Linhas de gráfico, status ativo, glows)
+     #E0F7FA — Pale Highlight (Fundos de cards de dados, badges)
+     #333333 — Tagline / Dark Charcoal (Títulos e textos principais)
+     #64748B — Subtítulos e labels secundárias
+   Tipografia: Inter (Semi-Bold para títulos, Regular para subtítulos, Light para corpo)
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --obsynx-white: #FFFFFF;
+  --obsynx-page-bg: #F8FAFC;
+  --obsynx-blue: #0056D6;
+  --obsynx-cyan: #00BFFF;
+  --obsynx-pale-ice: #E0F7FA;
+  --obsynx-text-dark: #333333;
+  --obsynx-text-muted: #64748B;
+  --obsynx-border: #E2E8F0;
+  --obsynx-card-shadow: 0 4px 14px rgba(0, 86, 214, 0.08);
+}
+
+/* Tipografia Global Inter */
+body, html, *, [class*="css-"] {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+}
+
+/* Fundo Geral Branco / Off-white Limpo */
+.grafana-app, main, body, [data-testid="dashboard-content"] {
+  background-color: var(--obsynx-page-bg) !important;
+  color: var(--obsynx-text-dark) !important;
+}
+
+/* Header & Barra Superior */
+header[aria-label="Navigation header"], nav[aria-label="Navigation"] {
+  background: var(--obsynx-white) !important;
+  border-bottom: 1px solid var(--obsynx-border) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+}
+
+/* Logo do Grafana substituída pelo Logo Obsynx */
+img[alt="Grafana"], svg[aria-label="Grafana"] {
+  content: url("/public/img/obsynx-logo.svg") !important;
+  height: 38px !important;
+  width: 38px !important;
+}
+
+/* Painéis / Cards de Dados Estilo Obsynx */
+[data-testid="panel-container"], .panel-container {
+  background: var(--obsynx-white) !important;
+  border: 1px solid var(--obsynx-border) !important;
+  border-radius: 10px !important;
+  box-shadow: var(--obsynx-card-shadow) !important;
+  transition: all 0.2s ease-in-out !important;
+}
+
+[data-testid="panel-container"]:hover {
+  border-color: var(--obsynx-cyan) !important;
+  box-shadow: 0 6px 18px rgba(0, 191, 255, 0.16) !important;
+}
+
+/* Títulos dos Painéis (Dark Charcoal #333333) */
+[data-testid="panel-header"] h2, .panel-title {
+  color: var(--obsynx-text-dark) !important;
+  font-weight: 600 !important;
+  font-size: 14px !important;
+  letter-spacing: -0.01em !important;
+}
+
+/* Botões Primários (#0056D6 com hover) */
+button[data-testid*="primary"], .btn-primary {
+  background-color: var(--obsynx-blue) !important;
+  background-image: none !important;
+  border: 1px solid var(--obsynx-blue) !important;
+  color: #FFFFFF !important;
+  font-weight: 600 !important;
+  border-radius: 6px !important;
+  box-shadow: 0 2px 6px rgba(0, 86, 214, 0.25) !important;
+}
+
+button[data-testid*="primary"]:hover {
+  background-color: #0045AE !important;
+  border-color: #0045AE !important;
+}
+
+/* Botões Secundários */
+button[data-testid*="secondary"], .btn-secondary {
+  background-color: #FFFFFF !important;
+  border: 1px solid var(--obsynx-border) !important;
+  color: var(--obsynx-text-dark) !important;
+  font-weight: 500 !important;
+  border-radius: 6px !important;
+}
+
+button[data-testid*="secondary"]:hover {
+  background-color: var(--obsynx-pale-ice) !important;
+  border-color: var(--obsynx-cyan) !important;
+  color: var(--obsynx-blue) !important;
+}
+
+/* Campos de Input (Borda suave + foco ciano) */
+input, select, textarea {
+  background-color: var(--obsynx-white) !important;
+  border: 1px solid var(--obsynx-border) !important;
+  color: var(--obsynx-text-dark) !important;
+  border-radius: 6px !important;
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: var(--obsynx-cyan) !important;
+  box-shadow: 0 0 0 2px rgba(0, 191, 255, 0.25) !important;
+}
+
+/* Badges e Tags (Pale Highlight #E0F7FA com texto azul/ciano) */
+.badge, [class*="tag-"] {
+  background-color: var(--obsynx-pale-ice) !important;
+  color: var(--obsynx-blue) !important;
+  border: 1px solid rgba(0, 191, 255, 0.4) !important;
+  font-weight: 600 !important;
+  border-radius: 4px !important;
+}
+
+/* Gráficos & Eixos */
+svg text {
+  fill: #64748B !important;
+  font-weight: 500 !important;
+}
+
+/* Scrollbars Clean */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--obsynx-page-bg);
+}
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--obsynx-cyan);
+}
+
+/* ==========================================================================
+   Gráficos do Design System: OBSYNX (Seções 7 e 10)
+   ========================================================================== */
+
+/* Linhas e Grids dos Gráficos */
+.u-over canvas, canvas {
+  filter: drop-shadow(0px 2px 4px rgba(0, 86, 214, 0.06));
+}
+
+/* Tooltips dos Gráficos com Tema Obsynx Clean */
+[data-testid="uplot-tooltip"], [class*="portalContainer"] > div {
+  background: #FFFFFF !important;
+  color: #333333 !important;
+  border: 1px solid #E2E8F0 !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 16px rgba(0, 86, 214, 0.12) !important;
+  font-family: 'Inter', sans-serif !important;
+}
+
+/* Legendas dos Gráficos */
+[data-testid="viz-legend"] {
+  font-size: 12px !important;
+  color: #64748B !important;
+  font-family: 'Inter', sans-serif !important;
+}
+
+[data-testid="viz-legend"] span {
+  font-weight: 500 !important;
+}
+
+/* Valores de Estatística / Métricas (Card de Dados #7) */
+[data-testid="stat-value"] {
+  font-family: 'Inter', sans-serif !important;
+  font-weight: 700 !important;
+  color: #0056D6 !important;
+  letter-spacing: -0.02em !important;
+}

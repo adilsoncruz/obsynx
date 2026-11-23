@@ -1,0 +1,24 @@
+service:
+  name: order-service-serverless
+  runtime: nodejs
+
+instrumentation:
+  automatic: true
+  methods:
+    - method: placeOrder
+      tracing: true
+      metrics:
+        - name: orders.created.total
+          type: counter
+          value_from: "1"
+          attributes_from:
+            region: "arg.0.region"
+            order_status: "return.status"
+          description: "Total serverless orders created"
+        - name: orders.cart.value
+          type: counter
+          unit: USD
+          value_from: "arg.0.totalAmount"
+          attributes_from:
+            region: "arg.0.region"
+          description: "Total cart value processed via serverless checkout"

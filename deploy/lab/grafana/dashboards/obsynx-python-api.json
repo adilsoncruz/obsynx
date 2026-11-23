@@ -1,0 +1,400 @@
+{
+  "editable": true,
+  "graphTooltip": 1,
+  "links": [
+    {
+      "title": "OBSynx Overview (Todos os Servi\u00e7os)",
+      "type": "link",
+      "url": "/d/obsynx-overview"
+    }
+  ],
+  "panels": [
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#0056D6"
+          },
+          "unit": "currencyBRL",
+          "custom": {},
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#0056D6",
+                "value": null
+              }
+            ]
+          }
+        }
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 8,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "title": "[OBSynx Custom] Volume Financeiro por Status (value_from: arg.1, attributes_from: return.status)",
+      "type": "stat",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum by (payment_status) (payments_amount_BRL_total{service_name=\"python-api\"} or payments_amount_total{service_name=\"python-api\"})",
+          "legendFormat": "Status: {{payment_status}}",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "graphMode": "area",
+        "colorMode": "value",
+        "textMode": "value_and_name"
+      }
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#0056D6"
+          },
+          "custom": {},
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#0056D6",
+                "value": null
+              }
+            ]
+          }
+        }
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 8,
+        "x": 8,
+        "y": 0
+      },
+      "id": 2,
+      "title": "[OBSynx Custom] Pagamentos por Status Retornado (attributes_from: return.status)",
+      "type": "stat",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum by (payment_status) (payments_processed_total{service_name=\"python-api\"})",
+          "legendFormat": "{{payment_status}}",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "graphMode": "area",
+        "colorMode": "value",
+        "textMode": "value_and_name"
+      }
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#00BFFF",
+                "value": null
+              },
+              {
+                "color": "#0056D6",
+                "value": 40
+              },
+              {
+                "color": "#E11D48",
+                "value": 75
+              }
+            ]
+          },
+          "custom": {}
+        }
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 8,
+        "x": 16,
+        "y": 0
+      },
+      "id": 3,
+      "title": "[OBSynx Custom] \u00daltimo Score Retornado por calculate_customer_risk (value_from: return)",
+      "type": "gauge",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "max(customer_risk_last_score{service_name=\"python-api\"})",
+          "legendFormat": "Risk Score",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#0056D6"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2.5,
+            "fillOpacity": 15,
+            "gradientMode": "opacity",
+            "showPoints": "never",
+            "axisBorderShow": false,
+            "axisGridShow": true
+          }
+        }
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 0,
+        "y": 7
+      },
+      "id": 4,
+      "title": "[OBSynx Custom] Chamadas por Fun\u00e7\u00e3o (process_payment & calculate_customer_risk)",
+      "type": "timeseries",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum by (code_function) (obsynx_business_calls_total{service_name=\"python-api\", code_function!=\"\"})",
+          "legendFormat": "{{code_function}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#0056D6"
+          },
+          "unit": "ms",
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2.5,
+            "fillOpacity": 15,
+            "gradientMode": "opacity",
+            "showPoints": "never",
+            "axisBorderShow": false,
+            "axisGridShow": true
+          }
+        }
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 12,
+        "y": 7
+      },
+      "id": 5,
+      "title": "[OBSynx Custom] Lat\u00eancia M\u00e9dia por Fun\u00e7\u00e3o (ms)",
+      "type": "timeseries",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum by (code_function) (obsynx_business_duration_milliseconds_sum{service_name=\"python-api\", code_function!=\"\"}) / clamp_min(sum by (code_function) (obsynx_business_duration_milliseconds_count{service_name=\"python-api\", code_function!=\"\"}), 1)",
+          "legendFormat": "{{code_function}} (avg ms)",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#0056D6"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2.5,
+            "fillOpacity": 15,
+            "gradientMode": "opacity",
+            "showPoints": "never",
+            "axisBorderShow": false,
+            "axisGridShow": true
+          }
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 14
+      },
+      "id": 6,
+      "title": "[OpenTelemetry Nativo] HTTP Server Requests Flask (http_server_duration_milliseconds_count / http_server_request_duration_seconds_count)",
+      "type": "timeseries",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum by (http_route, http_response_status_code) (http_server_request_duration_seconds_count{service_name=\"python-api\"} or http_server_duration_milliseconds_count{service_name=\"python-api\"})",
+          "legendFormat": "HTTP {{http_route}} ({{http_response_status_code}})",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#0056D6"
+          },
+          "unit": "bytes",
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2.5,
+            "fillOpacity": 15,
+            "gradientMode": "opacity",
+            "showPoints": "never",
+            "axisBorderShow": false,
+            "axisGridShow": true
+          }
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 8,
+        "y": 14
+      },
+      "id": 7,
+      "title": "[OpenTelemetry Nativo] Mem\u00f3ria Processo Python (process_runtime_cpython_memory_By)",
+      "type": "timeseries",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "max(process_runtime_cpython_memory_By{service_name=\"python-api\"} or process_runtime_cpython_memory_bytes{service_name=\"python-api\"})",
+          "legendFormat": "CPython RSS Memory",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#0056D6"
+          },
+          "unit": "s",
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2.5,
+            "fillOpacity": 15,
+            "gradientMode": "opacity",
+            "showPoints": "never",
+            "axisBorderShow": false,
+            "axisGridShow": true
+          }
+        }
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 14
+      },
+      "id": 8,
+      "title": "[OpenTelemetry Nativo] Tempo de CPU CPython (process_runtime_cpython_cpu_time_seconds_total)",
+      "type": "timeseries",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "max(process_runtime_cpython_cpu_time_seconds_total{service_name=\"python-api\"})",
+          "legendFormat": "CPython CPU Time (seconds)",
+          "refId": "A"
+        }
+      ]
+    }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 39,
+  "tags": [
+    "obsynx",
+    "python",
+    "opentelemetry-native"
+  ],
+  "time": {
+    "from": "now-15m",
+    "to": "now"
+  },
+  "title": "OBSynx Service \u2014 Python API (Custom IO + OpenTelemetry Native Metrics)",
+  "uid": "obsynx-python-api",
+  "version": 3
+}

@@ -1,0 +1,439 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [
+    {
+      "title": "Kotlin/Spring Dashboard",
+      "type": "link",
+      "url": "/d/obsynx-kotlin-spring-api"
+    },
+    {
+      "title": "Node.js Dashboard",
+      "type": "link",
+      "url": "/d/obsynx-nodejs-api"
+    },
+    {
+      "title": "Python Dashboard",
+      "type": "link",
+      "url": "/d/obsynx-python-api"
+    },
+    {
+      "title": "Go Dashboard",
+      "type": "link",
+      "url": "/d/obsynx-go-api"
+    }
+  ],
+  "panels": [
+    {
+      "id": 100,
+      "gridPos": {
+        "h": 3,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      },
+      "type": "text",
+      "title": "",
+      "options": {
+        "mode": "html",
+        "content": "<div style=\"display: flex; align-items: center; justify-content: space-between; background: #FFFFFF; padding: 14px 24px; border-radius: 10px; border: 1px solid #E2E8F0; box-shadow: 0 4px 16px rgba(0, 86, 214, 0.08); min-height: 85px;\">\n  <div style=\"display: flex; align-items: center; gap: 18px;\">\n    <img src=\"data:image/png;base64,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\" style=\"width: 56px; height: 56px; border-radius: 50%; border: 2px solid #0056D6; box-shadow: 0 2px 8px rgba(0, 86, 214, 0.2); object-fit: cover;\" alt=\"Obsynx Logo\" />\n    <div>\n      <div style=\"display: flex; align-items: center; gap: 12px;\">\n        <span style=\"font-size: 24px; font-weight: 700; color: #0056D6; letter-spacing: -0.5px; font-family: Inter, sans-serif;\">OBSYNX</span>\n        <span style=\"color: #0056D6; font-weight: 600; font-size: 11px; padding: 3px 10px; background: #E0F7FA; border-radius: 4px; border: 1px solid #00BFFF; text-transform: uppercase;\">zero-code observability</span>\n      </div>\n      <div style=\"font-size: 13px; color: #333333; margin-top: 3px; font-weight: 400;\">zero-code observability config only. \u2022 <span style=\"color: #0056D6; font-weight: 500;\">Design System Active</span></div>\n    </div>\n  </div>\n  <div style=\"display: flex; gap: 8px; flex-wrap: wrap;\">\n    <a href=\"/d/obsynx-go-api\" style=\"text-decoration: none; padding: 7px 14px; background: #0056D6; border: 1px solid #0056D6; border-radius: 6px; color: #FFFFFF; font-size: 12px; font-weight: 600; box-shadow: 0 2px 6px rgba(0,86,214,0.25);\">\ud83d\udc39 Go API</a>\n    <a href=\"/d/obsynx-nodejs-api\" style=\"text-decoration: none; padding: 7px 14px; background: #0056D6; border: 1px solid #0056D6; border-radius: 6px; color: #FFFFFF; font-size: 12px; font-weight: 600; box-shadow: 0 2px 6px rgba(0,86,214,0.25);\">\ud83d\udfe2 Node.js</a>\n    <a href=\"/d/obsynx-python-api\" style=\"text-decoration: none; padding: 7px 14px; background: #0056D6; border: 1px solid #0056D6; border-radius: 6px; color: #FFFFFF; font-size: 12px; font-weight: 600; box-shadow: 0 2px 6px rgba(0,86,214,0.25);\">\ud83d\udc0d Python</a>\n    <a href=\"/d/obsynx-kotlin-spring-api\" style=\"text-decoration: none; padding: 7px 14px; background: #0056D6; border: 1px solid #0056D6; border-radius: 6px; color: #FFFFFF; font-size: 12px; font-weight: 600; box-shadow: 0 2px 6px rgba(0,86,214,0.25);\">\u2615 Kotlin / Spring</a>\n  </div>\n</div>"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {}
+        }
+      }
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#0056D6"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#0056D6",
+                "value": null
+              }
+            ]
+          },
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 0,
+        "y": 4
+      },
+      "id": 1,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value_and_name"
+      },
+      "title": "Chamadas por Fun\u00e7\u00e3o de Neg\u00f3cio (Counter via SpanMetrics \u2014 JVM, Node.js, Python)",
+      "type": "stat",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum by (service_name, code_function) (obsynx_business_calls_total{code_function!=\"\"})",
+          "legendFormat": "{{service_name}} -> {{code_function}}",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#00BFFF",
+                "value": null
+              },
+              {
+                "color": "#0056D6",
+                "value": 40
+              },
+              {
+                "color": "#E11D48",
+                "value": 75
+              }
+            ]
+          },
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 12,
+        "y": 4
+      },
+      "id": 2,
+      "options": {
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      },
+      "title": "\u00daltimo Score de Risco Calculado (Gauge: customer_risk_last_score)",
+      "type": "gauge",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "max by (service_name, code_function) (customer_risk_last_score)",
+          "legendFormat": "{{service_name}} ({{code_function}})",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#00BFFF"
+          },
+          "custom": {
+            "drawStyle": "bars",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2,
+            "fillOpacity": 100,
+            "gradientMode": "none",
+            "stacking": {
+              "group": "A",
+              "mode": "normal"
+            },
+            "axisBorderShow": false,
+            "axisGridShow": true
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 11
+      },
+      "id": 3,
+      "title": "Total de Pagamentos Processados e C\u00e1lculos de Risco por Servi\u00e7o",
+      "type": "timeseries",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum by (service_name, code_function) (obsynx_business_calls_total{code_function!=\"\"})",
+          "legendFormat": "{{service_name}} :: {{code_function}}",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum by (service_name, code_function) (payments_processed_total)",
+          "legendFormat": "{{service_name}} :: {{code_function}} (payments_processed_total)",
+          "refId": "B"
+        }
+      ]
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#0056D6"
+          },
+          "unit": "ms",
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2.5,
+            "fillOpacity": 15,
+            "gradientMode": "opacity",
+            "showPoints": "never",
+            "axisBorderShow": false,
+            "axisGridShow": true
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 11
+      },
+      "id": 4,
+      "title": "Lat\u00eancia M\u00e9dia por Fun\u00e7\u00e3o de Neg\u00f3cio (Histogram: duration ms)",
+      "type": "timeseries",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum by (service_name, code_function) (obsynx_business_duration_milliseconds_sum{code_function!=\"\"}) / clamp_min(sum by (service_name, code_function) (obsynx_business_duration_milliseconds_count{code_function!=\"\"}), 1)",
+          "legendFormat": "{{service_name}} -> {{code_function}} (avg ms)",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 24,
+        "x": 0,
+        "y": 19
+      },
+      "id": 5,
+      "title": "Vis\u00e3o Geral HTTP + DB + M\u00e9todos Internos (Todos os Spans Derivados pelo OBSynx)",
+      "type": "table",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum by (service_name, span_name, code_function, span_kind) (obsynx_business_calls_total)",
+          "format": "table",
+          "instant": true,
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#0056D6"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2.5,
+            "fillOpacity": 15,
+            "gradientMode": "opacity",
+            "showPoints": "never",
+            "axisBorderShow": false,
+            "axisGridShow": true
+          }
+        }
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 0,
+        "y": 26
+      },
+      "id": 6,
+      "title": "[OpenTelemetry Nativo] HTTP Server Requests Capturados Automaticamente (http_server_request_duration_seconds_count)",
+      "type": "timeseries",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum by (service_name, http_route, http_response_status_code) (http_server_request_duration_seconds_count)",
+          "legendFormat": "{{service_name}} -> {{http_route}} ({{http_response_status_code}})",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#0056D6"
+          },
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "lineWidth": 2.5,
+            "fillOpacity": 15,
+            "gradientMode": "opacity",
+            "showPoints": "never",
+            "axisBorderShow": false,
+            "axisGridShow": true
+          }
+        }
+      },
+      "gridPos": {
+        "h": 7,
+        "w": 12,
+        "x": 12,
+        "y": 26
+      },
+      "id": 7,
+      "title": "[OpenTelemetry Collector & Cost-Aware Engine] Spans Recebidos, Filtrados (/health) e Sampleados",
+      "type": "timeseries",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum(otelcol_receiver_accepted_spans)",
+          "legendFormat": "Collector: Spans Aceitos (OTLP Receiver)",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum(otelcol_receiver_accepted_metric_points)",
+          "legendFormat": "Collector: Metric Points Aceitos",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum(otelcol_processor_filter_spans_filtered)",
+          "legendFormat": "Cost-Aware Policy: Spans Descartados (/health, /ready)",
+          "refId": "C"
+        }
+      ]
+    }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 39,
+  "tags": [
+    "obsynx",
+    "opentelemetry",
+    "zero-code"
+  ],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-15m",
+    "to": "now"
+  },
+  "title": "OBSynx \u2014 Universal Zero-Code Function & Service Observability",
+  "uid": "obsynx-overview",
+  "version": 1
+}

@@ -1,0 +1,92 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: payment-service-obsynx-rules
+  namespace: default
+  labels:
+    app.kubernetes.io/name: payment-service
+    app.kubernetes.io/part-of: obsynx-telemetry-governance
+    telemetry.obsynx.io/managed-by: gitops
+data:
+  obsynx.yaml: |
+    service:
+      name: payment-service
+      runtime: jvm
+
+    instrumentation:
+      automatic: true
+      methods:
+        - method: processPayment
+          class: com.company.payment.service.PaymentProcessor
+          tracing: true
+          metrics:
+            - name: payments.processed.total
+              type: counter
+              value_from: "1"
+              attributes_from:
+                currency: "arg.0.currency"
+                status: "return.status"
+              description: "Count of processed payments grouped by currency and final status"
+            - name: payments.amount.total
+              type: counter
+              unit: USD
+              value_from: "arg.0.amount"
+              attributes_from:
+                currency: "arg.0.currency"
+                status: "return.status"
+              description: "Aggregate transaction value extracted from arguments"
+            - name: payments.processing.duration
+              type: histogram
+              unit: ms
+              value_from: "duration_ms"
+              description: "Execution latency of the payment processor"
+---
+# Example deployment consuming this GitOps ConfigMap
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment-service
+  namespace: default
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: payment-service
+  template:
+    metadata:
+      labels:
+        app: payment-service
+    spec:
+      volumes:
+        - name: obsynx-agents
+          emptyDir: {}
+        - name: obsynx-rules
+          configMap:
+            name: payment-service-obsynx-rules
+
+      initContainers:
+        - name: obsynx-injector
+          image: ghcr.io/obsynx/obsynx-injector:v0.1.0
+          command: ["cp", "-r", "/agents/.", "/obsynx-agents/"]
+          volumeMounts:
+            - name: obsynx-agents
+              mountPath: /obsynx-agents
+
+      containers:
+        - name: payment-api
+          image: myregistry.azurecr.io/payment-service:v2.1.0
+          env:
+            # Overrides any /app/obsynx.yaml present in the container image:
+            - name: OBSYNX_CONFIG_PATH
+              value: "/etc/obsynx/obsynx.yaml"
+            - name: JAVA_TOOL_OPTIONS
+              value: "-javaagent:/obsynx-agents/jvm/obsynx-jvm-agent.jar"
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: "http://otel-collector.observability.svc:4317"
+          volumeMounts:
+            - name: obsynx-agents
+              mountPath: /obsynx-agents
+              readOnly: true
+            - name: obsynx-rules
+              mountPath: /etc/obsynx
+              readOnly: true
